@@ -40,6 +40,5 @@ while i < len(compare_image_pixel_values):
         j = j + 1
     i = i + 1
 
-misc.imsave('test.png', compare_image_pixel_values)
-output_image.save("mask.png")
+misc.imsave('Output.png', compare_image_pixel_values)
 print numpy.sqrt(total_difs)
