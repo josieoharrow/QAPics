@@ -28,9 +28,6 @@ squared_difs = numpy.multiply(difs, difs)
 total_difs = numpy.sum(squared_difs)
 mask = squared_difs > 10
 
-output_image = compare_image
-output_image.convert("RGBA")
-
 i = 0
 while i < len(compare_image_pixel_values):
     j = 0
@@ -41,4 +38,7 @@ while i < len(compare_image_pixel_values):
     i = i + 1
 
 misc.imsave('Output.png', compare_image_pixel_values)
+output_image = Image.open("Output.png")
+output_image = output_image.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.ROTATE_270)
+output_image.save("Output.png")
 print numpy.sqrt(total_difs)
