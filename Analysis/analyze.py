@@ -3,22 +3,35 @@ from PIL import Image
 import numpy
 from scipy import misc
 
-def diffs(baseline_image, compare_image):
+def resize_images(baseline_image, compare_image):
+
     if compare_image.size != baseline_image.size:
         print "WARNING: Size of images does not match."
 
     baseline_image_width, baseline_image_height = baseline_image.size
-    compare_image = compare_image.resize(baseline_image.size)#Scale to size in case they don't
-    #Match automatically
+    compare_image = compare_image.resize(baseline_image.size)#Scale to size in case they don't match
 
-    baseline_image = baseline_image.convert("RGBA")
+    return baseline_image, compare_image
+
+
+def convert_to_rgba(images_array):
+
+    baseline_image = images_array[0].convert("RGBA")
+    compare_image = images_array[1].convert("RGBA")
+    return baseline_image, compare_image
+
+
+def diffs(baseline_image, compare_image):
+
+    baseline_image, compare_image = convert_to_rgba(resize_images(baseline_image, compare_image))
+
+    width, height = baseline_image.size
+
     baseline_image_pixel_values = list(baseline_image.getdata())
-    baseline_image_pixel_values = numpy.array(baseline_image_pixel_values).reshape(baseline_image_width, baseline_image_height, 4, order="F")
+    baseline_image_pixel_values = numpy.array(baseline_image_pixel_values).reshape(width, height, 4, order="F")
 
-    compare_image_width, compare_image_height = compare_image.size
-    compare_image = compare_image.convert("RGBA")
     compare_image_pixel_values = list(compare_image.getdata())
-    compare_image_pixel_values = numpy.array(compare_image_pixel_values).reshape(compare_image_width, compare_image_height, 4, order="F")
+    compare_image_pixel_values = numpy.array(compare_image_pixel_values).reshape(width, height, 4, order="F")
 
     difs = numpy.subtract(compare_image_pixel_values, baseline_image_pixel_values)
 
