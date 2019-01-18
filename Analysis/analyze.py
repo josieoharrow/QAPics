@@ -42,7 +42,14 @@ def save_output_image_from_array(pixel_array):
     output_image.save("../Output/Output.png")
 
 
-def diffs(baseline_image, compare_image):
+def adjust_for_ignore_regions(difs, ignoreMask):
+
+    if ignoreMask:
+        difs[mask] = 0
+    return difs
+
+
+def diffs(baseline_image, compare_image, ignoreMask = None):
 
     baseline_image, compare_image = convert_two_images_to_rgba(resize_images(baseline_image, compare_image))
     width, height = baseline_image.size
@@ -53,6 +60,8 @@ def diffs(baseline_image, compare_image):
     compare_image_pixel_values = numpy.array(compare_image_pixel_values).reshape(width, height, 4, order="F")
 
     difs = numpy.subtract(compare_image_pixel_values, baseline_image_pixel_values)
+
+    difs = adjust_for_ignore_regions(difs, ignoreMask)
 
     squared_difs = numpy.multiply(difs, difs)
     total_difs = numpy.sum(squared_difs)
