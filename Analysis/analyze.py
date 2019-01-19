@@ -21,18 +21,28 @@ def convert_two_images_to_rgba(images_array):
     return baseline_image, compare_image
 
 
-def get_output_image_pixels(mask, compare_image_pixel_values, ignore_mask):
+def get_output_image_pixels(mask, compare_image_pixel_values, ignore_mask = None):
 
     i = 0
-    while i < len(compare_image_pixel_values):
-        j = 0
-        while j < len(compare_image_pixel_values[i]):
-            if mask[i][j][0] == True and ignore_mask[i][j][0] != 1:
-                compare_image_pixel_values[i][j] = numpy.subtract(compare_image_pixel_values[i][j], [-50, 50, 50, 100])
-            elif ignore_mask[i][j][0] == 1:
-                compare_image_pixel_values[i][j] = numpy.subtract(compare_image_pixel_values[i][j], [50, -50, 50, 100])
-            j = j + 1
-        i = i + 1
+
+    if ignore_mask == None:
+        while i < len(compare_image_pixel_values):
+            j = 0
+            while j < len(compare_image_pixel_values[i]):
+                if mask[i][j][0] == True:
+                    compare_image_pixel_values[i][j] = numpy.subtract(compare_image_pixel_values[i][j], [-50, 50, 50, 100])
+                j = j + 1
+            i = i + 1
+    else:
+        while i < len(compare_image_pixel_values):
+            j = 0
+            while j < len(compare_image_pixel_values[i]):
+                if mask[i][j][0] == True and ignore_mask[i][j][0] == False:
+                    compare_image_pixel_values[i][j] = numpy.subtract(compare_image_pixel_values[i][j], [-50, 50, 50, 100])
+                elif ignore_mask[i][j][0] == True:
+                    compare_image_pixel_values[i][j] = numpy.subtract(compare_image_pixel_values[i][j], [50, -50, 50, 100])
+                j = j + 1
+            i = i + 1
     return compare_image_pixel_values
 
 
@@ -44,20 +54,15 @@ def save_output_image_from_array(pixel_array):
     output_image.save("../Output/Output.png")
 
 
-def adjust_for_ignore_regions(difs, ignore_mask):
+def adjust_for_ignore_regions(difs, ignore_mask = None):
 
     if ignore_mask != None:
-        mask = ignore_mask > 0
-        difs[mask] = 0
+        difs[ignore_mask] = 0
     return difs
 
 
-def update_ignore_mask_array(ignore_mask_array, ignore_mask_images):
-    return ignore_mask_array
 
-
-
-def diffs(baseline_image, compare_image, ignore_mask_images = None):
+def diffs(baseline_image, compare_image, ignore_mask_image = None):
 
     baseline_image, compare_image = convert_two_images_to_rgba(resize_images(baseline_image, compare_image))
     width, height = baseline_image.size
@@ -69,9 +74,10 @@ def diffs(baseline_image, compare_image, ignore_mask_images = None):
 
     difs = numpy.subtract(compare_image_pixel_values, baseline_image_pixel_values)
 
-    ignore_mask_array = numpy.full((width, height, 4), 0)
-    if ignore_mask_images != None:
-        ignore_mask_array = update_ignore_mask_array(ignore_mask_array, ignore_mask_images)
+    if ignore_mask_image != None:
+        pixels = list(ignore_mask_image.getdata())
+        pixels = numpy.array(pixels).reshape(width, height, 4, order="F")
+        ignore_mask_array = pixels < 15#Give it a little padding
 
     difs = adjust_for_ignore_regions(difs, ignore_mask_array)
 
