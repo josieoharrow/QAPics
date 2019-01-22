@@ -2,6 +2,8 @@ import sys
 from PIL import Image
 import numpy
 from scipy import misc
+import os
+import datetime
 
 DIFFERENCE_THRESHOLD = 10
 
@@ -48,10 +50,15 @@ def get_output_image_pixels(mask, compare_image_pixel_values, ignore_mask = None
 
 def save_output_image_from_array(pixel_array):
 
-    misc.imsave('../Output/Output.png', pixel_array)
-    output_image = Image.open("../Output/Output.png")
+    if not os.path.isdir("../Output"):
+        os.mkdir("../Output")
+
+    currentDT = datetime.datetime.now()
+    image_name = '../Output/Output_' + str(currentDT) + '.png'
+    misc.imsave(image_name, pixel_array)
+    output_image = Image.open(image_name)
     output_image = output_image.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.ROTATE_270)
-    output_image.save("../Output/Output.png")
+    output_image.save(image_name)
 
 
 def adjust_for_ignore_regions(difs, ignore_mask = None):
