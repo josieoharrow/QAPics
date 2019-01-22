@@ -14,7 +14,6 @@ function createWindow () {
   mainWindow.loadFile('index.html')
   // Open the DevTools.
   mainWindow.webContents.openDevTools()
-  
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
     // Dereference the window object, usually you would store windows
@@ -64,32 +63,25 @@ function openFile() {
 }
 
 function location_input() {
-  document.getElementById("location")
-  .addEventListener("keyup", function(event) {
-  event.preventDefault();
-  if (event.keyCode === 13) {
-    document.getElementById("location").value = document.getElementById("location").value.replace(/\n/, "");
-    var dir = document.getElementById("location").value.replace(/\n/, "");
-    var fileextension = ".png";
-    var _target = document.getElementById('image_container');
-    _target.innerHTML = "";
-    fs.readdirSync(dir).forEach(file => {
-      if (file.indexOf(".") == -1) {
-        //Directory
-        _target.insertAdjacentHTML('beforeend', "<h4>" + file + "</h4>");
-        print_dir_images(_target, dir + "/" + file);
-      }
-    })
-  }
-  return;
-});
+ 
+  dir = "../Output"
+  var fileextension = ".png";
+  var _target = document.getElementById('outout_image_container');
+  _target.innerHTML = "";
+  fs.readdirSync(dir).forEach(file => {
+    if (file.indexOf(".png") != -1) {
+      //Directory
+      _target.insertAdjacentHTML('beforeend', "<li onclick=\"toggle_display_image('" + file + "')\">" + file);
+    }
+  })
+  print_dir_images(_target, dir);
 }
 
 function print_dir_images(target, dir) {
   fs.readdirSync(dir).forEach(file => {
     if (file.indexOf(".png") != -1) {
       var _img = fs.readFileSync(dir + "/" + file).toString('base64');
-      var _out = '<span onclick="toggle_display_image(\'' + file + '\')">' + file + '</span><img style="display: none" id="' + file + '"src="data:image/png;base64,' + _img + '" /> <br/>';
+      var _out = '<img style="display: none; width: 75px;" id="' + file + '" src="data:image/png;base64,' + _img + '" /> <br/>';
       target.insertAdjacentHTML('beforeend', _out);
     }
   })
@@ -103,8 +95,10 @@ function toggle_display_image(id_name) {
   }
 }
 
+/*
 function drawLayer(el, layer_start_x, layer_start_y, layer_x, layer_y, color = "yellow") {
+  would eventually like to do output processing on the UI side to speed the algorithm up.
   $(el).addClass("absolute");
   $(el).insertAdjacentHTML('beforeend', "")
   var canvas = ''
-}
+}*/
