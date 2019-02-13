@@ -25,7 +25,11 @@ An *open source* visual testing tool designed for QA teams
   
 ### Output
 
-  This is where output images, formatted with color highlighting differences, go after analysis. I believe the current file system will be adapted when I know more specifically how each element is going to work together- for example, I may consider storing baselines and output in a directory together, and individually in their own sub-directories.
+  This is where output images, formatted with color highlighting differences, go after analysis. I believe the current file system will be adapted when I know more specifically how each element is going to work together- for example, I may consider storing baselines and output in a directory together, and individually in their own sub-directories. Here is what outlook comes out as now: 
+  
+  ![alt text](https://github.com/josieoharrow/QAPics/blob/master/Output/Output_2019-01-21%2022:30:16.739397.png)
+  
+Note that this type of coloring works very well on images that do not have a lot of color; using a general add/subtract algorithm is less effective for images that are very colorful as the rgb filter looks less like one consistent color laid over the top of the image.  
   
 ### Masks
 
