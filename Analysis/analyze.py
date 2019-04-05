@@ -81,7 +81,7 @@ def diffs(baseline_image, compare_image, ignore_mask_image = None):
 
     difs = numpy.subtract(compare_image_pixel_values, baseline_image_pixel_values)
     ignore_mask_array = None
-    
+
     if ignore_mask_image != None:
         pixels = list(ignore_mask_image.getdata())
         pixels = numpy.array(pixels).reshape(width, height, 4, order="F")
