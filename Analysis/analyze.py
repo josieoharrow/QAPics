@@ -23,7 +23,7 @@ def convert_two_images_to_rgba(images_array):
     return baseline_image, compare_image
 
 
-def get_output_image_pixels(mask, compare_image_pixel_values, ignore_mask = None):
+def get_output_image_pixels(mask, compare_image_pixel_values, ignore_mask = None, scan_region_wave_space = None):
 
     i = 0
 
@@ -39,10 +39,12 @@ def get_output_image_pixels(mask, compare_image_pixel_values, ignore_mask = None
         while i < len(compare_image_pixel_values):
             j = 0
             while j < len(compare_image_pixel_values[i]):
-                if mask[i][j][0] == True and ignore_mask[i][j][0] == False:
+                if mask[i][j][0] == True and ignore_mask[i][j][0] == False and scan_region_wave_space[i][j][0] == False:
                     compare_image_pixel_values[i][j] = numpy.subtract(compare_image_pixel_values[i][j], [-50, 50, 50, 100])
                 elif ignore_mask[i][j][0] == True:
                     compare_image_pixel_values[i][j] = numpy.subtract(compare_image_pixel_values[i][j], [50, -50, 50, 100])
+                elif scan_region_wave_space[i][j][0] == True:
+                    compare_image_pixel_values[i][j] = numpy.subtract(compare_image_pixel_values[i][j], [-20, 70, 0, 100])
                 j = j + 1
             i = i + 1
     return compare_image_pixel_values
@@ -68,6 +70,19 @@ def adjust_for_ignore_regions(difs, ignore_mask = None):
     return difs
 
 
+def adjust_for_scan_regions(baseline_image_pixel_values, compare_image_pixel_values, difs, scan_region_mask_array = None):
+ if scan_region_mask_array == None:
+        while i < len(compare_image_pixel_values):
+            j = 0
+            while j < len(compare_image_pixel_values[i]):
+                if scan_region_mask_array[i][j][0] == True:
+                    if difs[i][j][0] >  0:
+                        difs[i][j][0] = numpy.subtract(compare_image_pixel_values[i][j][0], baseline_image_pixel_values[i][j + 1[0]])
+                    compare_image_pixel_values[i][j] = numpy.subtract(compare_image_pixel_values[i][j], [-50, 50, 50, 100])
+                j = j + 1
+            i = i + 1
+
+
 
 def diffs(baseline_image, compare_image, ignore_mask_image = None):
 
@@ -86,16 +101,27 @@ def diffs(baseline_image, compare_image, ignore_mask_image = None):
         pixels = list(ignore_mask_image.getdata())
         pixels = numpy.array(pixels).reshape(width, height, 4, order="F")
         ignore_mask_array = pixels < 15#Give it a little padding
+        scan_region_sub_image_pixels_greater = pixels > 60
+        scan_region_sub_image_pixels_less = pixels < 300
+        scan_region_sub_image_pixels = scan_region_sub_image_pixels_greater == scan_region_sub_image_pixels_less
 
+        #get x and get y
+        scan_region_wave_space_greater = pixels > 15
+        scan_region_wave_space_less = pixels < 60
+        scan_region_wave_space = scan_region_wave_space_greater == scan_region_wave_space_less
+        scan_x = numpy.count_nonzero(scan_region_wave_space)
+        scan_y = numpy.count_nonzero(scan_region_wave_space, axis=1)
+
+    print scan_region_sub_image_pixels
     difs = adjust_for_ignore_regions(difs, ignore_mask_array)
+
+   # difs = adjust_for_scan_regions(baseline_image_pixel_values, compare_image_pixel_values, difs, scan_region_mask_array)
 
     squared_difs = numpy.multiply(difs, difs)
     total_difs = numpy.sum(squared_difs)
     mask = squared_difs > DIFFERENCE_THRESHOLD
 
-    arr = get_output_image_pixels(mask, compare_image_pixel_values, ignore_mask_array)#Would like to have mask display optional
+    arr = get_output_image_pixels(mask, compare_image_pixel_values, ignore_mask_array, scan_region_sub_image_pixels)#Would like to have mask display optional
     save_output_image_from_array(arr)
 
     return numpy.sqrt(total_difs)
-
-

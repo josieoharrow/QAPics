@@ -1,0 +1,30 @@
+body {
+    background-color: #FFE4E1;
+}
+
+.center-text {
+    text-align: center;
+}
+
+.center {
+    align-content: center;
+}
+
+.flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.absolute {
+    position: absolute;
+}
+
+#save {
+    display: none;
+}
+
+#reset {
+    display: none;
+}
