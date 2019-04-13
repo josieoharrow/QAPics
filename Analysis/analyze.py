@@ -100,19 +100,27 @@ def diffs(baseline_image, compare_image, ignore_mask_image = None):
     if ignore_mask_image != None:
         pixels = list(ignore_mask_image.getdata())
         pixels = numpy.array(pixels).reshape(width, height, 4, order="F")
-        ignore_mask_array = pixels < 15#Give it a little padding
-        scan_region_sub_image_pixels_greater = pixels > 60
-        scan_region_sub_image_pixels_less = pixels < 300
-        scan_region_sub_image_pixels = scan_region_sub_image_pixels_greater == scan_region_sub_image_pixels_less
+        ignore_mask_array = pixels < 0
+
+        #Color thresholds based on SPECIFIC gray values, where (68, 68, 68) is the sub-image and
+        #light gray is the scan region.
+        #TODO1 This could be optimized to only look @ one axis very easily
+        image_pixels_greater_than_zero = pixels > 0
+        image_pixels_greater_than_sixty_eight = pixels > 68
+        image_pixels_less_than_two_hundred = pixels < 200
+
+        #Get scan & sub-image boxes
+        scan_region_sub_image_pixels = image_pixels_greater_than_sixty_eight != image_pixels_greater_than_zero      
+        scan_region_wave_space = image_pixels_greater_than_sixty_eight == image_pixels_less_than_two_hundred
 
         #get x and get y
-        scan_region_wave_space_greater = pixels > 15
-        scan_region_wave_space_less = pixels < 60
-        scan_region_wave_space = scan_region_wave_space_greater == scan_region_wave_space_less
         scan_x = numpy.count_nonzero(scan_region_wave_space)
-        scan_y = numpy.count_nonzero(scan_region_wave_space, axis=1)
+        print scan_region_wave_space[:,:,0]
+        counts = (scan_region_wave_space[:,:,0] == True).sum()#/4#And remove /4 for TODO1
+        print counts
+       # scan_y = numpy.count_nonzero(scan_region_wave_space[scan_region_wave_space.index(1)])
+        #print scan_y
 
-    print scan_region_sub_image_pixels
     difs = adjust_for_ignore_regions(difs, ignore_mask_array)
 
    # difs = adjust_for_scan_regions(baseline_image_pixel_values, compare_image_pixel_values, difs, scan_region_mask_array)
