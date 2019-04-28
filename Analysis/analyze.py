@@ -83,6 +83,15 @@ def adjust_for_scan_regions(baseline_image_pixel_values, compare_image_pixel_val
             i = i + 1
 
 
+def count_nonzero(gray_array):
+    count = 0
+    i = 0
+    while i < len(gray_array):
+        if(numpy.count_nonzero(gray_array[i]) > 0):
+            count = count + 1
+        i = i + 1
+    return count
+
 
 def diffs(baseline_image, compare_image, ignore_mask_image = None):
 
@@ -95,7 +104,7 @@ def diffs(baseline_image, compare_image, ignore_mask_image = None):
     compare_image_pixel_values = numpy.array(compare_image_pixel_values).reshape(width, height, 4, order="F")
 
     difs = numpy.subtract(compare_image_pixel_values, baseline_image_pixel_values)
-    ignore_mask_array = None
+    #ignore_mask_array = None
 
     if ignore_mask_image != None:
         pixels = list(ignore_mask_image.getdata())
@@ -114,12 +123,11 @@ def diffs(baseline_image, compare_image, ignore_mask_image = None):
         scan_region_wave_space = image_pixels_greater_than_sixty_eight == image_pixels_less_than_two_hundred
 
         #get x and get y
-        scan_x = numpy.count_nonzero(scan_region_wave_space)
-        print scan_region_wave_space[:,:,0]
-        counts = (scan_region_wave_space[:,:,0] == True).sum()#/4#And remove /4 for TODO1
-        print counts
-       # scan_y = numpy.count_nonzero(scan_region_wave_space[scan_region_wave_space.index(1)])
-        #print scan_y
+        
+        scan_x = count_nonzero(scan_region_sub_image_pixels)
+        print scan_x
+        scan_y = count_nonzero(scan_region_sub_image_pixels[scan_x])
+        print scan_y
 
     difs = adjust_for_ignore_regions(difs, ignore_mask_array)
 
