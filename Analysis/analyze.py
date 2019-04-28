@@ -128,6 +128,8 @@ def diffs(baseline_image, compare_image, ignore_mask_image = None):
         print scan_x
         scan_y = count_nonzero(scan_region_sub_image_pixels[scan_x])
         print scan_y
+        sub_image = baseline_image_pixel_values[:scan_x, :scan_y]
+
 
     difs = adjust_for_ignore_regions(difs, ignore_mask_array)
 
