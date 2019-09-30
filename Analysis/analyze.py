@@ -27,7 +27,7 @@ def get_output_image_pixels(mask, compare_image_pixel_values, ignore_mask = None
 
     i = 0
 
-    if ignore_mask == None:
+    if ignore_mask.any():
         while i < len(compare_image_pixel_values):
             j = 0
             while j < len(compare_image_pixel_values[i]):
@@ -73,11 +73,13 @@ def adjust_for_ignore_regions(difs, ignore_mask = None):
 def adjust_for_scan_regions(baseline_image_pixel_values, compare_image_pixel_values, ignore_mask_array, scan_region_sub_image_pixels = None, scan_region_wave_space = None):
  if scan_region_sub_image_pixels.any():
         i = 0
+        print scan_region_wave_space
         scan_x = len(scan_region_sub_image_pixels)
         scan_y = len(scan_region_sub_image_pixels[0])
         #Take the sub image out of the baseline image.
         sub_img = baseline_image_pixel_values[:scan_x, :scan_y]
-        #if look_for_within(compare_image_pixel_values, sub_image,)
+
+        #if look_for_within(compare_image_pixel_values, sub_image, )
         #while i < scan_x:
         #    j = 0
         #    while j < scan_y:
@@ -137,9 +139,11 @@ def diffs(baseline_image, compare_image, ignore_mask_image = None):
     compare_image_pixel_values = numpy.array(compare_image_pixel_values).reshape(width, height, 4, order="F")
 
     difs = numpy.subtract(compare_image_pixel_values, baseline_image_pixel_values)
+    print(difs)
     #ignore_mask_array = None
-
+    #print(baseline_image_pixel_values)
     if ignore_mask_image != None:
+        
         pixels = list(ignore_mask_image.getdata())
         pixels = numpy.array(pixels).reshape(width, height, 4, order="F")
         ignore_mask_array = pixels < 68
@@ -147,13 +151,13 @@ def diffs(baseline_image, compare_image, ignore_mask_image = None):
         #Color thresholds based on SPECIFIC gray values, where (68, 68, 68) is the sub-image and
         #light gray is the scan region.
         #TODO1 This could be optimized to only look @ one axis very easily
-        image_pixels_greater_than_zero = pixels > 0
-        image_pixels_greater_than_sixty_eight = pixels > 68
-        image_pixels_less_than_two_hundred = pixels < 200
+        #image_pixels_greater_than_zero = pixels > 0
+       # scan_region_sub_image_pixels = (50 < pixels <= 68)
+       # scan_region_wave_space = (68 < pixels < 200)
 
         #Get scan & sub-image boxes
-        scan_region_sub_image_pixels = image_pixels_greater_than_sixty_eight != image_pixels_greater_than_zero      
-        scan_region_wave_space = image_pixels_greater_than_sixty_eight == image_pixels_less_than_two_hundred
+       # scan_region_sub_image_pixels = image_pixels_greater_than_sixty_eight != image_pixels_greater_than_zero      
+        #scan_region_wave_space = image_pixels_greater_than_sixty_eight == image_pixels_less_than_two_hundred
 
         #get x and get y
         
@@ -162,11 +166,10 @@ def diffs(baseline_image, compare_image, ignore_mask_image = None):
 
         #Will need changes for multiple scan regions
         sub_image = baseline_image_pixel_values[:scan_x, :scan_y]
-
-
-    difs = adjust_for_scan_regions(baseline_image_pixel_values, compare_image_pixel_values, ignore_mask_array, sub_image, scan_region_wave_space)
-    #print(ignore_mask_array)
-    difs = adjust_for_ignore_regions(difs, ignore_mask_array)
+        #Set to 1 on mask    
+        scan_ignore_array = adjust_for_scan_regions(baseline_image_pixel_values, compare_image_pixel_values, ignore_mask_array, sub_image, scan_region_wave_space)
+        ignore_mask_array[scan_ignore_array] = 1
+        difs = adjust_for_ignore_regions(difs, ignore_mask_array)
 
     #Probably more useful to return total pixels different instead of total color space different
     squared_difs = numpy.multiply(difs, difs)
