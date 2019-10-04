@@ -125,7 +125,7 @@ def look_for_within(container_image, sub_image, start_x, start_y, x_range, y_ran
                 return (i, j)
 	return None
 
-
+#TODO: Josie please rename this. :(
 def diffs(baseline_image, compare_image, ignore_mask_image = None):
 
     baseline_image, compare_image = convert_two_images_to_rgba(resize_images(baseline_image, compare_image))
@@ -135,6 +135,9 @@ def diffs(baseline_image, compare_image, ignore_mask_image = None):
 
     baseline_image_pixel_values = numpy.array(baseline_image_pixel_values).reshape(width, height, 4, order="F")
     compare_image_pixel_values = numpy.array(compare_image_pixel_values).reshape(width, height, 4, order="F")
+    
+    #TODO: Henry this may be a good place. What do you think?
+    #converted_baseline_image_pixel_values = (baseline_image_pixel_values)
 
     difs = numpy.subtract(compare_image_pixel_values, baseline_image_pixel_values)
     #ignore_mask_array = None
