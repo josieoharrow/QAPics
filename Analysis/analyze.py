@@ -27,7 +27,7 @@ def get_output_image_pixels(mask, compare_image_pixel_values, ignore_mask = None
 
     i = 0
 
-    if ignore_mask == None:
+    if ignore_mask.any():
         while i < len(compare_image_pixel_values):
             j = 0
             while j < len(compare_image_pixel_values[i]):
@@ -66,6 +66,7 @@ def save_output_image_from_array(pixel_array):
 def adjust_for_ignore_regions(difs, ignore_mask = None):
 
     if ignore_mask.any():
+        print(difs)
         difs[ignore_mask] = 0
     return difs
 
@@ -167,8 +168,9 @@ def diffs(baseline_image, compare_image, ignore_mask_image = None):
         sub_image = baseline_image_pixel_values[:scan_x, :scan_y]
 
 
-    difs = adjust_for_scan_regions(baseline_image_pixel_values, compare_image_pixel_values, ignore_mask_array, sub_image, scan_region_wave_space)
+    #difs = adjust_for_scan_regions(baseline_image_pixel_values, compare_image_pixel_values, ignore_mask_array, sub_image, scan_region_wave_space)
     #print(ignore_mask_array)
+    print(difs)
     difs = adjust_for_ignore_regions(difs, ignore_mask_array)
 
     #Probably more useful to return total pixels different instead of total color space different
