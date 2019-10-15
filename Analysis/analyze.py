@@ -10,7 +10,7 @@ DIFFERENCE_THRESHOLD = 10
 def resize_images(baseline_image, compare_image):
 
     if compare_image.size != baseline_image.size:
-        print "WARNING: Size of images does not match."
+        print("WARNING: Size of images does not match.")
     baseline_image_width, baseline_image_height = baseline_image.size
     compare_image = compare_image.resize(baseline_image.size)#Scale to size in case they don't match
     return baseline_image, compare_image
@@ -123,7 +123,37 @@ def look_for_within(container_image, sub_image, start_x, start_y, x_range, y_ran
 
             if (res > 0):
                 return (i, j)
-	return None
+    return None
+
+#Convert one rgb pixel to lab
+def Pxl_rgb2lab(pixel): #pixel will be a 4-D array RGBa (a ignored)
+        #Convert to XYZ
+        ref_Whites = numpy.array([95.047, 100.0, 108.883, 1])
+        for i in range(3):
+            val = pixel[i] / 255
+            if val > 0.04045:
+                val= ( ( (val) + 0.055 ) / 1.055) ** 2.4
+            else:
+                val = val / 12.92
+            pixel[i] = round(val * 100, 4)
+        X = pixel [0] * 0.4124 + pixel [1] * 0.3576 + pixel [2] * 0.1805
+        Y = pixel [0] * 0.2126 + pixel [1] * 0.7152 + pixel [2] * 0.0722
+        Z = pixel [0] * 0.0193 + pixel [1] * 0.1192 + pixel [2] * 0.9505
+        pixel = numpy.array([X,Y,Z,pixel[3]])
+        #Convert to lab
+        for i in range(3):
+
+            val = pixel[i] / ref_Whites[i]
+            if val > 0.008856:
+                val = val ** (1/3)
+            else:
+                val = (903.3 * val + 16 )/ 116
+            pixel[i] = val
+        
+        L = round(( 116 * pixel[1] ) - 16, 4)
+        a = round(500 * ( pixel[0] - pixel[1] ), 4)
+        b = round(200 * ( pixel[1] - pixel[2] ), 4)
+        return numpy.array([L, a , b, pixel[3]])
 
 
 def diffs(baseline_image, compare_image, ignore_mask_image = None):
