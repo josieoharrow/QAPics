@@ -15,7 +15,7 @@ def resize_images(baseline_image, compare_image):
     compare_image = compare_image.resize(baseline_image.size)#Scale to size in case they don't match
     return baseline_image, compare_image
 
-
+#TODO: Josie, take this out. This method is hillariously pointless.
 def convert_two_images_to_rgba(images_array):
 
     baseline_image = images_array[0].convert("RGBA")
@@ -27,7 +27,7 @@ def get_output_image_pixels(mask, compare_image_pixel_values, ignore_mask = None
 
     i = 0
 
-    if ignore_mask == None:
+    if ignore_mask.any():
         while i < len(compare_image_pixel_values):
             j = 0
             while j < len(compare_image_pixel_values[i]):
@@ -66,6 +66,7 @@ def save_output_image_from_array(pixel_array):
 def adjust_for_ignore_regions(difs, ignore_mask = None):
 
     if ignore_mask.any():
+        print(difs)
         difs[ignore_mask] = 0
     return difs
 
@@ -125,7 +126,13 @@ def look_for_within(container_image, sub_image, start_x, start_y, x_range, y_ran
                 return (i, j)
 	return None
 
+def difs(matrix_one, matrix_two):
+    if (matrix_one.size != matrix_two.size):
+        return "Subtraction is not defined for matrices of different dimensions."
+    return numpy.subtract(matrix_one, matrix_two)
 
+
+#TODO: Josie please rename this. :(
 def diffs(baseline_image, compare_image, ignore_mask_image = None):
 
     baseline_image, compare_image = convert_two_images_to_rgba(resize_images(baseline_image, compare_image))
@@ -135,8 +142,11 @@ def diffs(baseline_image, compare_image, ignore_mask_image = None):
 
     baseline_image_pixel_values = numpy.array(baseline_image_pixel_values).reshape(width, height, 4, order="F")
     compare_image_pixel_values = numpy.array(compare_image_pixel_values).reshape(width, height, 4, order="F")
+    
+    #TODO: Henry this may be a good place. What do you think?
+    #converted_baseline_image_pixel_values = (baseline_image_pixel_values)
 
-    difs = numpy.subtract(compare_image_pixel_values, baseline_image_pixel_values)
+    difs = difs(compare_image_pixel_values, baseline_image_pixel_values)
     #ignore_mask_array = None
 
     if ignore_mask_image != None:
@@ -164,8 +174,9 @@ def diffs(baseline_image, compare_image, ignore_mask_image = None):
         sub_image = baseline_image_pixel_values[:scan_x, :scan_y]
 
 
-    difs = adjust_for_scan_regions(baseline_image_pixel_values, compare_image_pixel_values, ignore_mask_array, sub_image, scan_region_wave_space)
+    #difs = adjust_for_scan_regions(baseline_image_pixel_values, compare_image_pixel_values, ignore_mask_array, sub_image, scan_region_wave_space)
     #print(ignore_mask_array)
+    print(difs)
     difs = adjust_for_ignore_regions(difs, ignore_mask_array)
 
     #Probably more useful to return total pixels different instead of total color space different

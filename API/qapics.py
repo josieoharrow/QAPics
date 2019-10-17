@@ -17,6 +17,6 @@ if len(sys.argv) > 2:
 	mask_image = Image.open(sys.argv[2], 'r')
 
 def get_differences(baseline_image, compare_image, mask_image):
-	print(analyze.diffs(baseline_image, compare_image, mask_image))
+	print(analyze.compare(baseline_image, compare_image, mask_image))
 
 get_differences(baseline_image, compare_image, mask_image)
