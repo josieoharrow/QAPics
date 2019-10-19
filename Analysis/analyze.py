@@ -11,7 +11,6 @@ def resize_images(baseline_image, compare_image):
 
     if compare_image.size != baseline_image.size:
         print("WARNING: Size of images does not match.")
-    baseline_image_width, baseline_image_height = baseline_image.size
     compare_image = compare_image.resize(baseline_image.size)#Scale to size in case they don't match
     return baseline_image, compare_image
 
