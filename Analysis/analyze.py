@@ -10,8 +10,7 @@ DIFFERENCE_THRESHOLD = 10
 def resize_images(baseline_image, compare_image):
 
     if compare_image.size != baseline_image.size:
-        print "WARNING: Size of images does not match."
-    baseline_image_width, baseline_image_height = baseline_image.size
+        print("WARNING: Size of images does not match.")
     compare_image = compare_image.resize(baseline_image.size)#Scale to size in case they don't match
     return baseline_image, compare_image
 
@@ -124,7 +123,7 @@ def look_for_within(container_image, sub_image, start_x, start_y, x_range, y_ran
 
             if (res > 0):
                 return (i, j)
-	return None
+    return None
 
 def difs(matrix_one, matrix_two):
     if (matrix_one.size != matrix_two.size):
