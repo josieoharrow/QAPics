@@ -1,12 +1,15 @@
 import sys
 from PIL import Image
 import sys
-sys.path.append('../Analysis/')
+import os
+QAPicsDir = os.path.dirname(os.path.abspath(__file__)) + "/.."
+
+sys.path.append(QAPicsDir + "/Analysis")
 import analyze
 
-baseline_image_path = "../Baselines/" + sys.argv[1] + ".png"
-compare_image_path = "../" + sys.argv[1] + ".png"
-mask_image =  "../Masks/" + sys.argv[1] + ".png" 
+baseline_image_path = QAPicsDir + "/Baselines/" + sys.argv[1] + ".png"
+compare_image_path = QAPicsDir + "/" + sys.argv[1] + ".png"
+mask_image =  QAPicsDir + "/Masks/" + sys.argv[1] + ".png" 
 #Could store screenshot in output and adjust it with filters later.
 
 baseline_image = Image.open(baseline_image_path, 'r')
