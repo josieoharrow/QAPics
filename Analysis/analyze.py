@@ -10,12 +10,11 @@ DIFFERENCE_THRESHOLD = 10
 def resize_images(baseline_image, compare_image):
 
     if compare_image.size != baseline_image.size:
-        print "WARNING: Size of images does not match."
-    baseline_image_width, baseline_image_height = baseline_image.size
+        print("WARNING: Size of images does not match.")
     compare_image = compare_image.resize(baseline_image.size)#Scale to size in case they don't match
     return baseline_image, compare_image
 
-
+#TODO: Josie, take this out. This method is hillariously pointless.
 def convert_two_images_to_rgba(images_array):
 
     baseline_image = images_array[0].convert("RGBA")
@@ -124,7 +123,12 @@ def look_for_within(container_image, sub_image, start_x, start_y, x_range, y_ran
 
             if (res > 0):
                 return (i, j)
-	return None
+    return None
+
+def difs(matrix_one, matrix_two):
+    if (matrix_one.size != matrix_two.size):
+        return "Subtraction is not defined for matrices of different dimensions."
+    return numpy.subtract(matrix_one, matrix_two)
 
 #TODO: Josie please rename this. :(
 def diffs(baseline_image, compare_image, ignore_mask_image = None):
@@ -140,7 +144,7 @@ def diffs(baseline_image, compare_image, ignore_mask_image = None):
     #TODO: Henry this may be a good place. What do you think?
     #converted_baseline_image_pixel_values = (baseline_image_pixel_values)
 
-    difs = numpy.subtract(compare_image_pixel_values, baseline_image_pixel_values)
+    difs = difs(compare_image_pixel_values, baseline_image_pixel_values)
     #ignore_mask_array = None
 
     if ignore_mask_image != None:
