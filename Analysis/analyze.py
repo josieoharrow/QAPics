@@ -11,8 +11,7 @@ DIFFERENCE_THRESHOLD = 10
 def resize_images(baseline_image, compare_image):
 
     if compare_image.size != baseline_image.size:
-        print "WARNING: Size of images does not match."
-    baseline_image_width, baseline_image_height = baseline_image.size
+        print("WARNING: Size of images does not match.")
     compare_image = compare_image.resize(baseline_image.size)#Scale to size in case they don't match
     return baseline_image, compare_image
 
@@ -80,7 +79,6 @@ def get_difs_array(matrix_one, matrix_two):
     if (matrix_one.size != matrix_two.size):
         return "Subtraction is not defined for matrices of different dimensions."
     return numpy.subtract(matrix_one, matrix_two)
-
 
 def compare(baseline_image, compare_image, ignore_mask_image = None):
 
