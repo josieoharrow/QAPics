@@ -1,9 +1,7 @@
 import sys
 from PIL import Image
 import numpy
-from scipy import misc
 import os
-import datetime
 import copy
 
 DIFFERENCE_THRESHOLD = 10
@@ -25,43 +23,30 @@ def convert_two_images_to_rgba(images_array):
 def get_output_image_pixels(mask, compare_image_pixel_values, ignore_mask = None):
 
     i = 0
-    if not ignore_mask.any():
-        while i < len(compare_image_pixel_values):
-            j = 0
-            while j < len(compare_image_pixel_values[i]):
-                if mask[i][j][0] == True:
-                    compare_image_pixel_values[i][j] = numpy.subtract(compare_image_pixel_values[i][j], [-50, 50, 50, 100])
-                j = j + 1
-            i = i + 1
-    else:
-        while i < len(compare_image_pixel_values):
-            j = 0
-            while j < len(compare_image_pixel_values[i]):
-                if mask[i][j][0] == True and ignore_mask[i][j][0] == False:
-                    compare_image_pixel_values[i][j] = numpy.subtract(compare_image_pixel_values[i][j], [-50, 50, 50, 100])
-                elif ignore_mask[i][j][0] == True:
-                    compare_image_pixel_values[i][j] = numpy.subtract(compare_image_pixel_values[i][j], [50, -50, 50, 100])
-                j = j + 1
-            i = i + 1
+    while i < len(compare_image_pixel_values):
+        j = 0
+        while j < len(compare_image_pixel_values[i]):
+            if mask[i][j][0] == True:# and ignore_mask[i][j][0] == False:
+                compare_image_pixel_values[i][j] = numpy.subtract(compare_image_pixel_values[i][j], [-50, 50, 50, 100])
+            else:#if ignore_mask[i][j][0] == True:
+                compare_image_pixel_values[i][j] = numpy.subtract(compare_image_pixel_values[i][j], [50, -50, 50, 100])
+            j = j + 1
+        i = i + 1
     return compare_image_pixel_values
 
 
-def save_output_image_from_array(pixel_array):
-
-    if not os.path.isdir("../Output"):
-        os.mkdir("../Output")
-    currentDT = datetime.datetime.now()
-    image_name = '../Output/Output_' + str(currentDT) + '.png'
-    misc.imsave(image_name, pixel_array)
-    output_image = Image.open(image_name)
-    output_image = output_image.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.ROTATE_270)
-    output_image.save(image_name)
 
 
 #Overwrite pixels to be black where there is an ignore mask. Black matches black :)
-def adjust_for_ignore_regions(original_pixels, ignore_mask = None):
-    if ignore_mask.any():
-        original_pixels[ignore_mask] = 0
+def adjust_for_ignore_regions(original_pixels, ignore_blocks):
+    i = 0
+    while i < len(ignore_blocks):
+        x = int(ignore_blocks[i]["startX"])
+        y = int(ignore_blocks[i]["startY"])
+        width = int(ignore_blocks[i]["width"])
+        height = int(ignore_blocks[i]["height"])
+        original_pixels[y - 1: height, x - 1: width] = 0
+        i = i + 1
     return original_pixels
 
 
@@ -80,7 +65,7 @@ def get_difs_array(matrix_one, matrix_two):
         return "Subtraction is not defined for matrices of different dimensions."
     return numpy.subtract(matrix_one, matrix_two)
 
-def compare(baseline_image, compare_image, ignore_mask_image = None):
+def compare(baseline_image, compare_image, ignore_mask):
 
     baseline_image, compare_image = convert_two_images_to_rgba(resize_images(baseline_image, compare_image))
     width, height = baseline_image.size
@@ -91,15 +76,11 @@ def compare(baseline_image, compare_image, ignore_mask_image = None):
     compare_image_pixel_values = numpy.array(compare_image_pixel_values).reshape(width, height, 4, order="F")
     output_pixels = copy.copy(baseline_image_pixel_values)
 
-    #Populate ignore_mask_array
-    if ignore_mask_image != None:
-        pixels = list(ignore_mask_image.getdata())
-        pixels = numpy.array(pixels).reshape(width, height, 4, order="F")
-        ignore_mask_array = pixels < 68
+    ignore_blocks = ignore_mask["ignore"]
 
     #Adjust pixels by overwriting ignore regions
-    baseline_image_pixel_values = adjust_for_ignore_regions(baseline_image_pixel_values, ignore_mask_array)
-    compare_image_pixel_values = adjust_for_ignore_regions(compare_image_pixel_values, ignore_mask_array)
+    baseline_image_pixel_values = adjust_for_ignore_regions(baseline_image_pixel_values, ignore_blocks)
+    compare_image_pixel_values = adjust_for_ignore_regions(compare_image_pixel_values, ignore_blocks)
 
     #Getting diffs
     difs = get_difs_array(compare_image_pixel_values, baseline_image_pixel_values)
@@ -108,8 +89,7 @@ def compare(baseline_image, compare_image, ignore_mask_image = None):
     mask = squared_difs > DIFFERENCE_THRESHOLD
 
     #Get output image and save
-    arr = get_output_image_pixels(mask, output_pixels, ignore_mask_array)
-    save_output_image_from_array(arr)
+    arr = get_output_image_pixels(mask, output_pixels, ignore_blocks)
 
     #Return diffs count
-    return numpy.sqrt(total_difs)
+    return ([numpy.sqrt(total_difs), arr])
